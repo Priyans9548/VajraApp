@@ -16,17 +16,21 @@ source.dir = .
 source.include_exts = py,png,jpg,kv,atlas
 
 # (str) Application versioning
-version = 2.0
+version = 2.1
 
 # (list) Application requirements
-# Yahan 'android' requirement zaroori hai permissions handle karne ke liye
-requirements = python3,kivy==2.3.0,pyTelegramBotAPI,requests,certifi,chardet,idna,urllib3,android
+# Naye Android versions ke liye specific versions zaroori hain
+requirements = python3==3.11.1,kivy==2.3.0,pyTelegramBotAPI,requests,android,certifi,chardet,idna,urllib3
+
+# (str) Custom source folders for requirements
+# Isse compilation ke errors kam honge
+p4a.branch = master
 
 # (list) Supported orientations
 orientation = portrait
 
 # (list) List of service to declare
-# Isse app background mein active rahegi
+# Background mein kaam karne ke liye
 services = monitor:main.py
 
 #
@@ -37,14 +41,14 @@ services = monitor:main.py
 fullscreen = 0
 
 # (list) Permissions 
-# MANAGE_EXTERNAL_STORAGE Android 11-16 ke liye "All Files Access" deta hai
-android.permissions = INTERNET, WAKE_LOCK, RECEIVE_BOOT_COMPLETED, FOREGROUND_SERVICE, READ_EXTERNAL_STORAGE, WRITE_EXTERNAL_STORAGE, MANAGE_EXTERNAL_STORAGE, FOREGROUND_SERVICE_DATA_SYNC
+# Android 14+ ke liye FOREGROUND_SERVICE_SPECIAL_USE aur DATA_SYNC dono zaroori hain
+android.permissions = INTERNET, WAKE_LOCK, RECEIVE_BOOT_COMPLETED, FOREGROUND_SERVICE, READ_EXTERNAL_STORAGE, WRITE_EXTERNAL_STORAGE, MANAGE_EXTERNAL_STORAGE, FOREGROUND_SERVICE_DATA_SYNC, FOREGROUND_SERVICE_SPECIAL_USE
 
-# (int) Target Android API (API 34 = Android 14, supports up to 16)
+# (int) Target Android API (API 34 = Android 14+)
 android.api = 34
 
-# (int) Minimum API your APK will support
-android.minapi = 21
+# (int) Minimum API (Android 7.0+)
+android.minapi = 24
 
 # (int) Android SDK version to use
 android.sdk = 34
@@ -59,7 +63,7 @@ android.private_storage = True
 android.accept_sdk_license = True
 
 # (str) The Android archs to build for
-# Isme 64-bit support hona zaroori hai naye phones ke liye
+# Modern devices ke liye dono 64 aur 32 bit architecture
 android.archs = arm64-v8a, armeabi-v7a
 
 # (bool) enables Android auto backup feature
@@ -69,7 +73,6 @@ android.allow_backup = True
 android.debug_artifact = apk
 
 # (list) List of Java .jar files to add
-# Naye Android versions ke liye zaroori meta-data
 android.meta_data = com.google.android.gms.permission.AD_ID=false
 
 [buildozer]
@@ -79,4 +82,3 @@ log_level = 2
 
 # (int) Display warning if buildozer is run as root
 warn_on_root = 0
-
