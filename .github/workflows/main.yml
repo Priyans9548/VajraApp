@@ -4,6 +4,9 @@ on: [push]
 jobs:
   build:
     runs-on: ubuntu-latest
+    env:
+      # Isse Node 20 wali saari warnings khatam ho jayengi
+      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
@@ -13,14 +16,21 @@ jobs:
         with:
           python-version: '3.11'
 
+      - name: Install System Dependencies
+        run: |
+          # Sirf wo install karo jo bilkul zaroori hain
+          sudo apt-get update -q
+          sudo apt-get install -y -q git zip unzip openjdk-17-jdk python3-pip autoconf libtool pkg-config zlib1g-dev libncurses5-dev libncursesw5-dev libtinfo5 cmake libffi-dev libssl-dev
+
       - name: Install Buildozer
         run: |
-          pip install --user --upgrade Cython==0.29.33 buildozer setuptools
+          pip install --upgrade pip
+          pip install Cython==0.29.33 buildozer setuptools
 
       - name: Build with Buildozer
         run: |
-          # Buildozer ko path mein add karke seedha build shuru karein
           export PATH=$PATH:$HOME/.local/bin
+          # Licenses accept karna aur build shuru karna
           yes | buildozer -v android debug
         env:
           APP_ANDROID_ACCEPT_SDK_LICENSE: "1"
