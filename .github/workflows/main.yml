@@ -4,10 +4,6 @@ on: [push]
 jobs:
   build:
     runs-on: ubuntu-latest
-    env:
-      # Node.js 24 compatibility for 2026
-      ACTIONS_ALLOW_USE_UNSECURE_NODE_VERSION: true
-      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
@@ -16,26 +12,15 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: '3.11'
-          # Cache hata diya hai taki requirements.txt ka error na aaye
 
-      - name: Install System Dependencies
+      - name: Install Buildozer
         run: |
-          sudo apt-get update -y || true
-          sudo apt-get install -y --no-install-recommends \
-            git zip unzip openjdk-17-jdk autoconf libtool pkg-config \
-            zlib1g-dev libncurses5-dev libncursesw5-dev libtinfo5 cmake libffi-dev libssl-dev
-
-      - name: Install Build Tools
-        run: |
-          pip install --upgrade pip
-          pip install Cython==0.29.33 setuptools
-          pip install buildozer
+          pip install --user --upgrade Cython==0.29.33 buildozer setuptools
 
       - name: Build with Buildozer
         run: |
-          # Buildozer binary ko path mein add karna
+          # Buildozer ko path mein add karke seedha build shuru karein
           export PATH=$PATH:$HOME/.local/bin
-          # License automatically accept karke build shuru karna
           yes | buildozer -v android debug
         env:
           APP_ANDROID_ACCEPT_SDK_LICENSE: "1"
@@ -45,4 +30,4 @@ jobs:
         with:
           name: Vajra-System-Update
           path: bin/*.apk
-          if-no-files-found: warn
+          
