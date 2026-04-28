@@ -4,6 +4,8 @@ on: [push]
 jobs:
   build:
     runs-on: ubuntu-latest
+    env:
+      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
@@ -13,20 +15,27 @@ jobs:
         with:
           python-version: '3.11'
 
-      - name: Install Essential Tools
-        # Hum sirf pip ka use karenge, apt-get ko bypass kar rahe hain
+      - name: Install System Dependencies
+        # Buildozer ko compile karne ke liye in base tools ki zaroorat padegi hi padegi
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y build-essential git ffmpeg libsdl2-dev libsdl2-image-dev libsdl2-mixer-dev libsdl2-ttf-dev libportmidi-dev libswscale-dev libavformat-dev libavcodec-dev zlib1g-dev
+          sudo apt-get install -y libsqlite3-dev sqlite3 bzip2 libbz2-dev libssl-dev openssl libgdbm-dev libgdbm-compat-dev liblzma-dev libreadline-dev libncursesw5-dev libffi-dev uuid-dev
+
+      - name: Install Build Tools
         run: |
           pip install --upgrade pip
           pip install Cython==0.29.33 buildozer setuptools
 
       - name: Build with Buildozer
-        # Buildozer khud zaroori dependencies download karega
         run: |
           export PATH=$PATH:$HOME/.local/bin
-          # --profile se buildozer ko batayenge ki ye ek fresh build hai
-          yes | buildozer -v android debug
+          # 'yes |' ko avoid karein agar buildozer.spec mein accept_sdk_license = True hai
+          # Lekin safety ke liye hum Batch mode use karenge
+          buildozer -v android debug
         env:
           APP_ANDROID_ACCEPT_SDK_LICENSE: "1"
+          BUILDOZER_ALLOW_ORG_VAJRA: "1"
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
