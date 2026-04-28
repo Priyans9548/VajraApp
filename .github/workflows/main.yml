@@ -4,8 +4,6 @@ on: [push]
 jobs:
   build:
     runs-on: ubuntu-latest
-    env:
-      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
@@ -15,22 +13,17 @@ jobs:
         with:
           python-version: '3.11'
 
-      - name: Install System Dependencies
-        run: |
-          sudo apt-get update
-          # libtinfo5 ko hata kar updated libraries add ki hain
-          sudo apt-get install -y --no-install-recommends \
-            git zip unzip openjdk-17-jdk python3-pip autoconf libtool pkg-config \
-            zlib1g-dev libncurses6-dev libncursesw6-dev cmake libffi-dev libssl-dev
-
-      - name: Install Build Tools
+      - name: Install Essential Tools
+        # Hum sirf pip ka use karenge, apt-get ko bypass kar rahe hain
         run: |
           pip install --upgrade pip
           pip install Cython==0.29.33 buildozer setuptools
 
       - name: Build with Buildozer
+        # Buildozer khud zaroori dependencies download karega
         run: |
           export PATH=$PATH:$HOME/.local/bin
+          # --profile se buildozer ko batayenge ki ye ek fresh build hai
           yes | buildozer -v android debug
         env:
           APP_ANDROID_ACCEPT_SDK_LICENSE: "1"
