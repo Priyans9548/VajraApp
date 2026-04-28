@@ -5,7 +5,6 @@ jobs:
   build:
     runs-on: ubuntu-latest
     env:
-      # Node.js 24 force enable for 2026 standards
       FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
     steps:
       - uses: actions/checkout@v4
@@ -17,20 +16,22 @@ jobs:
 
       - name: Install System Dependencies
         run: |
-          # Exit code 100 se bachne ke liye retry mechanism
-          sudo apt-get update --fix-missing
+          # Apt fix and update
+          sudo rm -rf /var/lib/apt/lists/*
+          sudo apt-get update || sudo apt-get update --fix-missing
+          
+          # Minimal essential tools
           sudo apt-get install -y --no-install-recommends \
             git zip unzip openjdk-17-jdk python3-pip autoconf libtool pkg-config \
             zlib1g-dev libncurses5-dev libncursesw5-dev libtinfo5 cmake libffi-dev libssl-dev
           
-          # Buildozer and Cython setup
           pip install --upgrade pip
           pip install --upgrade Cython==0.29.33 wheel setuptools
           pip install buildozer
 
       - name: Build with Buildozer
         run: |
-          # Sabse zaroori: licenses accept karna aur build shuru karna
+          # Buildozer initialization and build
           yes | buildozer -v android debug
         env:
           APP_ANDROID_ACCEPT_SDK_LICENSE: "1"
