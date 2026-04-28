@@ -4,40 +4,45 @@ on: [push]
 jobs:
   build:
     runs-on: ubuntu-latest
-    env:
-      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+    permissions:
+      contents: write
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout Code
+        uses: actions/checkout@v4
 
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: '3.11'
+          cache: 'pip' # Isse build fast hoga
+
+      - name: Install Buildozer and Cython
+        run: |
+          pip install --upgrade pip
+          pip install Cython==0.29.33 buildozer setuptools
 
       - name: Install System Dependencies
+        # Yahan humne error handling aur mirror fixing add kar di hai
         run: |
-          # Apt fix and update
-          sudo rm -rf /var/lib/apt/lists/*
-          sudo apt-get update || sudo apt-get update --fix-missing
-          
-          # Minimal essential tools
+          sudo apt-get update -y || true
           sudo apt-get install -y --no-install-recommends \
-            git zip unzip openjdk-17-jdk python3-pip autoconf libtool pkg-config \
+            git zip unzip openjdk-17-jdk autoconf libtool pkg-config \
             zlib1g-dev libncurses5-dev libncursesw5-dev libtinfo5 cmake libffi-dev libssl-dev
-          
-          pip install --upgrade pip
-          pip install --upgrade Cython==0.29.33 wheel setuptools
-          pip install buildozer
 
       - name: Build with Buildozer
+        # Is step mein hum path setup aur binary configuration handle karenge
         run: |
-          # Buildozer initialization and build
+          export PATH=$PATH:$HOME/.local/bin
           yes | buildozer -v android debug
         env:
           APP_ANDROID_ACCEPT_SDK_LICENSE: "1"
+          # 2026 Node 24 Support
+          FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
           name: Vajra-System-Update
           path: bin/*.apk
+          if-no-files-found: error
+          
