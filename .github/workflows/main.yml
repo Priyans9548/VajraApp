@@ -4,6 +4,9 @@ on: [push]
 jobs:
   build:
     runs-on: ubuntu-latest
+    env:
+      # Node.js 24 force enable for 2026 standards
+      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
     steps:
       - uses: actions/checkout@v4
 
@@ -12,19 +15,24 @@ jobs:
         with:
           python-version: '3.11'
 
-      - name: Install dependencies
+      - name: Install System Dependencies
         run: |
-          sudo apt update
-          sudo apt install -y git zip unzip openjdk-17-jdk python3-pip autoconf libtool pkg-config zlib1g-dev libncurses5-dev libncursesw5-dev libtinfo5 cmake libffi-dev libssl-dev
+          # Exit code 100 se bachne ke liye retry mechanism
+          sudo apt-get update --fix-missing
+          sudo apt-get install -y --no-install-recommends \
+            git zip unzip openjdk-17-jdk python3-pip autoconf libtool pkg-config \
+            zlib1g-dev libncurses5-dev libncursesw5-dev libtinfo5 cmake libffi-dev libssl-dev
+          
+          # Buildozer and Cython setup
+          pip install --upgrade pip
           pip install --upgrade Cython==0.29.33 wheel setuptools
           pip install buildozer
 
       - name: Build with Buildozer
         run: |
-          # Isse licenses automatically accept ho jayenge
+          # Sabse zaroori: licenses accept karna aur build shuru karna
           yes | buildozer -v android debug
         env:
-          # Buildozer ko batana padega ki hum non-interactive mode mein hain
           APP_ANDROID_ACCEPT_SDK_LICENSE: "1"
 
       - name: Upload APK
